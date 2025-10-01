@@ -196,6 +196,7 @@ A fully functional calculator interface in the browser with:
 
 ### Prompt 1: Initial Learning
 **Prompt used:** "I want to learn Rust WebAssembly. Give me a step-by-step guide to create a simple calculator that runs in the browser using Rust and WebAssembly."
+**AI Curriculum Link:** [ai.moringaschool.com - Rust WebAssembly Learning Path](https://ai.moringaschool.com/rust-webassembly)
 
 **AI's response summary:** The AI provided a comprehensive overview of Rust WebAssembly, explained the wasm-bindgen crate, and gave step-by-step instructions for setting up a basic project structure.
 
@@ -203,6 +204,7 @@ A fully functional calculator interface in the browser with:
 
 ### Prompt 2: Error Resolution
 **Prompt used:** "I'm getting a 'wasm-pack not found' error when trying to build my Rust WebAssembly project. How do I install and configure wasm-pack properly?"
+**AI Curriculum Link:** [ai.moringaschool.com - WebAssembly Build Tools](https://ai.moringaschool.com/webassembly-build-tools)
 
 **AI's response summary:** The AI provided multiple installation methods for wasm-pack, explained the PATH configuration, and offered troubleshooting steps for common installation issues.
 
@@ -210,6 +212,7 @@ A fully functional calculator interface in the browser with:
 
 ### Prompt 3: Advanced Features
 **Prompt used:** "How can I add more advanced mathematical functions like square root and power operations to my Rust WebAssembly calculator?"
+**AI Curriculum Link:** [ai.moringaschool.com - Advanced Rust Functions](https://ai.moringaschool.com/advanced-rust-functions)
 
 **AI's response summary:** The AI showed how to implement additional mathematical functions in Rust, explained error handling for edge cases (like negative square roots), and demonstrated proper wasm-bindgen annotations.
 
@@ -217,6 +220,7 @@ A fully functional calculator interface in the browser with:
 
 ### Prompt 4: Performance Optimization
 **Prompt used:** "What are the best practices for optimizing Rust WebAssembly performance and reducing bundle size?"
+**AI Curriculum Link:** [ai.moringaschool.com - WebAssembly Optimization](https://ai.moringaschool.com/webassembly-optimization)
 
 **AI's response summary:** The AI explained various optimization techniques including release builds, wasm-opt, dead code elimination, and memory management strategies.
 
