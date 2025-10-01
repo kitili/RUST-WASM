@@ -24,6 +24,20 @@ A high-performance calculator built with Rust and WebAssembly, featuring a beaut
 - **Build Tool**: `wasm-pack`
 - **Web Server**: Python HTTP server (for local development)
 
+## 🎓 Capstone Project
+
+This project was created as part of a capstone assignment to demonstrate learning a new technology using AI prompts. The project showcases:
+
+- **Learning Process**: Documented AI prompt usage and learning reflections
+- **Technology Mastery**: Comprehensive understanding of Rust WebAssembly
+- **Practical Application**: Working calculator with real-world functionality
+- **Documentation**: Complete toolkit for others to learn the technology
+
+### 📚 Documentation Files
+- **CAPSTONE_TOOLKIT.md**: Complete learning guide with AI prompts and reflections
+- **PEER_TESTING_GUIDE.md**: Step-by-step testing instructions for peers
+- **README.md**: This file - project overview and setup
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -52,6 +66,9 @@ A high-performance calculator built with Rust and WebAssembly, featuring a beaut
 
 4. **Open your browser**
    Navigate to `http://localhost:8000`
+
+### 🧪 For Peer Testing
+If you're testing this project, please follow the [PEER_TESTING_GUIDE.md](PEER_TESTING_GUIDE.md) for comprehensive testing instructions.
 
 ## 🎮 How to Use
 
