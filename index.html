@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rust + WebAssembly Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .calculator-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            max-width: 400px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .display {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: right;
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            word-break: break-all;
+        }
+
+        .buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #e9ecef;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-number {
+            background: #fff;
+            border-color: #dee2e6;
+        }
+
+        .btn-operator {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+        }
+
+        .btn-clear {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+        }
+
+        .btn-equals {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: white;
+            border: none;
+        }
+
+        .btn-special {
+            background: linear-gradient(45deg, #a8edea, #fed6e3);
+            color: #333;
+            border: none;
+        }
+
+        .status {
+            text-align: center;
+            padding: 10px;
+            background: #e8f5e8;
+            border-radius: 5px;
+            color: #2d5a2d;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .error {
+            background: #ffe6e6;
+            color: #d63031;
+        }
+
+        .loading {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .demo-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .demo-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .demo-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .demo-btn {
+            padding: 10px 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .demo-btn:hover {
+            background: #5a6fd8;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <div class="header">
+            <h1>🦀 Rust Calculator</h1>
+            <p>Powered by WebAssembly</p>
+        </div>
+
+        <div class="display" id="display">0</div>
+
+        <div class="buttons-grid">
+            <button class="btn btn-clear" onclick="clearAll()">C</button>
+            <button class="btn btn-special" onclick="sqrt()">√</button>
+            <button class="btn btn-special" onclick="power()">x²</button>
+            <button class="btn btn-operator" onclick="setOperator('/')">÷</button>
+
+            <button class="btn btn-number" onclick="appendNumber('7')">7</button>
+            <button class="btn btn-number" onclick="appendNumber('8')">8</button>
+            <button class="btn btn-number" onclick="appendNumber('9')">9</button>
+            <button class="btn btn-operator" onclick="setOperator('*')">×</button>
+
+            <button class="btn btn-number" onclick="appendNumber('4')">4</button>
+            <button class="btn btn-number" onclick="appendNumber('5')">5</button>
+            <button class="btn btn-number" onclick="appendNumber('6')">6</button>
+            <button class="btn btn-operator" onclick="setOperator('-')">-</button>
+
+            <button class="btn btn-number" onclick="appendNumber('1')">1</button>
+            <button class="btn btn-number" onclick="appendNumber('2')">2</button>
+            <button class="btn btn-number" onclick="appendNumber('3')">3</button>
+            <button class="btn btn-operator" onclick="setOperator('+')">+</button>
+
+            <button class="btn btn-number" onclick="appendNumber('0')" style="grid-column: span 2;">0</button>
+            <button class="btn btn-number" onclick="appendNumber('.')">.</button>
+            <button class="btn btn-equals" onclick="calculate()">=</button>
+        </div>
+
+        <div class="status" id="status">Ready to calculate!</div>
+
+        <div class="demo-section">
+            <h3>🚀 Quick Demo (Rust Functions)</h3>
+            <p>Try these pre-programmed calculations using our Rust functions:</p>
+            <div class="demo-buttons">
+                <button class="demo-btn" onclick="demoAdd()">5 + 3 = ?</button>
+                <button class="demo-btn" onclick="demoMultiply()">7 × 4 = ?</button>
+                <button class="demo-btn" onclick="demoSqrt()">√16 = ?</button>
+                <button class="demo-btn" onclick="demoPower()">2³ = ?</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import init, { Calculator, add_numbers, multiply_numbers } from './pkg/calculator.js';
+
+        let calculator;
+        let currentNumber = '';
+        let previousNumber = '';
+        let operator = '';
+        let waitingForNewNumber = false;
+
+        // Initialize the WebAssembly module
+        async function initWasm() {
+            try {
+                updateStatus('Loading WebAssembly module...', 'loading');
+                await init();
+                calculator = new Calculator();
+                updateStatus('Rust + WebAssembly Calculator loaded successfully!', 'success');
+                console.log('WebAssembly module loaded!');
+            } catch (error) {
+                updateStatus('Error loading WebAssembly module: ' + error.message, 'error');
+                console.error('Error loading WASM:', error);
+            }
+        }
+
+        // Update status display
+        function updateStatus(message, type = '') {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'status ' + type;
+        }
+
+        // Update display
+        function updateDisplay(value) {
+            document.getElementById('display').textContent = value;
+        }
+
+        // Append number to current input
+        function appendNumber(num) {
+            if (waitingForNewNumber) {
+                currentNumber = num;
+                waitingForNewNumber = false;
+            } else {
+                currentNumber = currentNumber === '0' ? num : currentNumber + num;
+            }
+            updateDisplay(currentNumber);
+        }
+
+        // Set operator
+        function setOperator(op) {
+            if (currentNumber === '') return;
+            
+            if (previousNumber !== '' && operator !== '') {
+                calculate();
+            }
+            
+            previousNumber = currentNumber;
+            operator = op;
+            waitingForNewNumber = true;
+        }
+
+        // Perform calculation using Rust functions
+        function calculate() {
+            if (previousNumber === '' || currentNumber === '' || operator === '') return;
+
+            const a = parseFloat(previousNumber);
+            const b = parseFloat(currentNumber);
+            let result;
+
+            try {
+                switch (operator) {
+                    case '+':
+                        result = calculator.add(a, b);
+                        break;
+                    case '-':
+                        result = calculator.subtract(a, b);
+                        break;
+                    case '*':
+                        result = calculator.multiply(a, b);
+                        break;
+                    case '/':
+                        result = calculator.divide(a, b);
+                        break;
+                    default:
+                        return;
+                }
+
+                if (isNaN(result)) {
+                    updateStatus('Error: Invalid calculation', 'error');
+                    updateDisplay('Error');
+                } else {
+                    updateStatus(`Calculated: ${previousNumber} ${operator} ${currentNumber} = ${result}`, 'success');
+                    updateDisplay(result.toString());
+                }
+
+                currentNumber = result.toString();
+                previousNumber = '';
+                operator = '';
+                waitingForNewNumber = true;
+
+            } catch (error) {
+                updateStatus('Calculation error: ' + error.message, 'error');
+                console.error('Calculation error:', error);
+            }
+        }
+
+        // Clear all
+        function clearAll() {
+            currentNumber = '';
+            previousNumber = '';
+            operator = '';
+            waitingForNewNumber = false;
+            updateDisplay('0');
+            updateStatus('Calculator cleared!', 'success');
+            calculator.clear();
+        }
+
+        // Square root
+        function sqrt() {
+            if (currentNumber === '') return;
+            
+            const num = parseFloat(currentNumber);
+            try {
+                const result = calculator.sqrt(num);
+                if (isNaN(result)) {
+                    updateStatus('Error: Cannot calculate square root of negative number', 'error');
+                    updateDisplay('Error');
+                } else {
+                    updateStatus(`√${currentNumber} = ${result}`, 'success');
+                    updateDisplay(result.toString());
+                    currentNumber = result.toString();
+                    waitingForNewNumber = true;
+                }
+            } catch (error) {
+                updateStatus('Square root error: ' + error.message, 'error');
+            }
+        }
+
+        // Power (x²)
+        function power() {
+            if (currentNumber === '') return;
+            
+            const num = parseFloat(currentNumber);
+            try {
+                const result = calculator.power(num, 2);
+                updateStatus(`${currentNumber}² = ${result}`, 'success');
+                updateDisplay(result.toString());
+                currentNumber = result.toString();
+                waitingForNewNumber = true;
+            } catch (error) {
+                updateStatus('Power error: ' + error.message, 'error');
+            }
+        }
+
+        // Demo functions using standalone Rust functions
+        function demoAdd() {
+            try {
+                const result = add_numbers(5, 3);
+                updateStatus('Demo: add_numbers(5, 3) = ' + result, 'success');
+                updateDisplay(result.toString());
+            } catch (error) {
+                updateStatus('Demo error: ' + error.message, 'error');
+            }
+        }
+
+        function demoMultiply() {
+            try {
+                const result = multiply_numbers(7, 4);
+                updateStatus('Demo: multiply_numbers(7, 4) = ' + result, 'success');
+                updateDisplay(result.toString());
+            } catch (error) {
+                updateStatus('Demo error: ' + error.message, 'error');
+            }
+        }
+
+        function demoSqrt() {
+            try {
+                const result = calculator.sqrt(16);
+                updateStatus('Demo: √16 = ' + result, 'success');
+                updateDisplay(result.toString());
+            } catch (error) {
+                updateStatus('Demo error: ' + error.message, 'error');
+            }
+        }
+
+        function demoPower() {
+            try {
+                const result = calculator.power(2, 3);
+                updateStatus('Demo: 2³ = ' + result, 'success');
+                updateDisplay(result.toString());
+            } catch (error) {
+                updateStatus('Demo error: ' + error.message, 'error');
+            }
+        }
+
+        // Make functions globally available
+        window.appendNumber = appendNumber;
+        window.setOperator = setOperator;
+        window.calculate = calculate;
+        window.clearAll = clearAll;
+        window.sqrt = sqrt;
+        window.power = power;
+        window.demoAdd = demoAdd;
+        window.demoMultiply = demoMultiply;
+        window.demoSqrt = demoSqrt;
+        window.demoPower = demoPower;
+
+        // Initialize when page loads
+        initWasm();
+    </script>
+</body>
+</html>
