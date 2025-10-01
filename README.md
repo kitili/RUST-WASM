@@ -159,4 +159,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Made with ❤️ and Rust** 🦀
+**Created by [kitili](https://github.com/kitili)** 🚀
+
+*Built with ❤️ using Rust and WebAssembly* 🦀
